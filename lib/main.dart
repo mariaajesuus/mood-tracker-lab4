@@ -15,7 +15,7 @@ class MoodTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mood Tracker',
       theme: ThemeData(colorSchemeSeed: Colors.teal),
-      home: HomeScreen(entries: sampleEntries),
+      home: HomeScreen(initialEntries: sampleEntries),
     );
   }
 }

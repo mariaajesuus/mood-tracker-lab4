@@ -29,6 +29,17 @@ class MoodScoreSelector extends StatelessWidget {
     //   Wrap for a Row and run the app on a narrow phone. What happens?
     //   Hint: a for loop inside the list literal:
     //     for (var score = 1; score <= 10; score++) ChoiceChip(...)
-    return const Text('Scores 1-10 go here');
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (var score = 1; score <= 10; score++)
+          ChoiceChip(
+            label: Text('$score'),
+            selected: selectedScore == score,
+            onSelected: (_) => onChanged(score),
+          ),
+      ],
+    );
   }
 }
