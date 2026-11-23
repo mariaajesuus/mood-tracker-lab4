@@ -17,14 +17,10 @@ class MoodEntryForm extends StatefulWidget {
 }
 
 class _MoodEntryFormState extends State<MoodEntryForm> {
-  // TODO 1.3: Declare the selected score. It starts with nothing selected:
-  //   int? _score;
   int? _score;
 
-  // TODO 2.1: Declare a TextEditingController for the note. Override
-  //   dispose() and call _noteController.dispose() before super.dispose().
-  //   Why does a controller need disposing when an int does not?
   final _noteController = TextEditingController();
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -32,16 +28,23 @@ class _MoodEntryFormState extends State<MoodEntryForm> {
     super.dispose();
   }
 
-  // TODO 2.3: Write a _save() method that:
-  //   1. creates a MoodEntry with the selected score, the trimmed note
-  //      (or null if the trimmed note is empty) and DateTime.now()
-  //   2. passes the entry to widget.onSubmit
-  //   3. clears the form: no score selected and an empty note
   void _save() {
     final score = _score;
-    if (score == null) return;
+    if (score == null) {
+      setState(() {
+        _errorMessage = 'Choose a score from 1 to 10';
+      });
+      return;
+    }
 
     final trimmedNote = _noteController.text.trim();
+    if (trimmedNote.length > maxNoteLength) {
+      setState(() {
+        _errorMessage = 'Note must be $maxNoteLength characters or fewer.';
+      });
+      return;
+    }
+
     final entry = MoodEntry(
       score: score,
       note: trimmedNote.isEmpty ? null : trimmedNote,
@@ -52,6 +55,7 @@ class _MoodEntryFormState extends State<MoodEntryForm> {
 
     setState(() {
       _score = null;
+      _errorMessage = null;
     });
     _noteController.clear();
   }
@@ -69,35 +73,39 @@ class _MoodEntryFormState extends State<MoodEntryForm> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
-            // TODO 1.3 (continued): Pass _score instead of null. In
-            //   onChanged, store the tapped score inside setState(() { ... }).
-            //   Then try it without setState. What happens, and why?
             MoodScoreSelector(
               selectedScore: _score,
               onChanged: (score) {
                 setState(() {
                   _score = score;
+                  _errorMessage = null;
                 });
               },
             ),
-            // TODO 2.2: Add a TextField for the note that uses your
-            //   controller, labelled 'Note (optional)' (InputDecoration).
             const SizedBox(height: 16),
             TextField(
               controller: _noteController,
+              onChanged: (_) {
+                if (_errorMessage != null) {
+                  setState(() {
+                    _errorMessage = null;
+                  });
+                }
+              },
               decoration: const InputDecoration(
                 labelText: 'Note (optional)',
                 border: OutlineInputBorder(),
               ),
             ),
-            // TODO 2.3 (continued): Add a FilledButton labelled 'Save entry'
-            //   that calls _save. While no score is selected, pass
-            //   onPressed: null so that the button is disabled.
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _score == null ? null : _save,
-              child: const Text('Save entry'),
-            ),
+            FilledButton(onPressed: _save, child: const Text('Save entry')),
           ],
         ),
       ),
